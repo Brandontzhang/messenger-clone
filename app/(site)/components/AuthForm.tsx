@@ -1,7 +1,9 @@
 'use client';
 
+import axios from 'axios';
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from 'react-hot-toast';
 
 import Input from "@/app/components/inputs/Input";
 import Button from "@/app/components/Button";
@@ -31,7 +33,9 @@ const AuthForm = () => {
     setIsLoading(true);
 
     if (variant === 'REGISTER') {
-      // Axios Register
+      axios.post('/api/register/', data)
+        .catch(() => toast.error("Registration Error"))
+        .finally(() => setIsLoading(false));
     } else {
       // NextAuth Sign In
     }
