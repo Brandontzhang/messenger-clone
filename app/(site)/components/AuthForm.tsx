@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from 'react-hot-toast';
+import { signIn } from 'next-auth/react';
 
 import Input from "@/app/components/inputs/Input";
 import Button from "@/app/components/Button";
@@ -37,14 +38,37 @@ const AuthForm = () => {
         .catch(() => toast.error("Registration Error"))
         .finally(() => setIsLoading(false));
     } else {
-      // NextAuth Sign In
+      signIn('credentials', {
+        ...data,
+        redirect: false
+      })
+        .then((callback) => {
+          if (callback?.error) {
+            toast.error('Invalid credentials');
+          }
+
+          if (callback?.ok && !callback?.error) {
+            toast.success('Logged In');
+          }
+        })
+        .finally(() => setIsLoading(false));
     }
   }
 
   const socialAction = (action: string) => {
     setIsLoading(true);
 
-    // NextAuth Social Sign In
+    signIn(action, { redirect: false })
+      .catch((callback) => {
+        if (callback?.error) {
+          toast.error("Login Error");
+        }
+
+        if (callback?.ok && !callback.error) {
+          toast.success("Logged In");
+        }
+      })
+      .finally(() => setIsLoading(false));
   }
 
   return (
