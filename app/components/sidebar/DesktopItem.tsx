@@ -12,7 +12,8 @@ interface DesktopItemProps {
   onClick?: () => void
 }
 const DesktopItem: React.FC<DesktopItemProps> = ({ href, label, icon: Icon, active, onClick }) => {
-  const handleClick = (() => {
+  const handleClick = ((e: React.FormEvent<HTMLElement>) => {
+    e.preventDefault();
     if (onClick) {
       return onClick();
     }

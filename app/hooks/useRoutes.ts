@@ -5,8 +5,10 @@ import { HiArrowLeftOnRectangle, HiUsers } from "react-icons/hi2"
 import { signOut } from "next-auth/react";
 
 import useConversation from "./useConversation";
+import { useRouter } from "next/navigation";
 
 const useRoutes = () => {
+  const router = useRouter();
   const pathname = usePathname();
   const { conversationId } = useConversation();
 
@@ -26,7 +28,10 @@ const useRoutes = () => {
     {
       label: 'Logout',
       href: '#',
-      onClick: () => signOut(),
+      onClick: async () => {
+        await signOut();
+        router.push("/");
+      },
       icon: HiArrowLeftOnRectangle
     }
   ], [pathname, conversationId]);
