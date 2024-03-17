@@ -10,7 +10,7 @@ const getMessages = async (conversationId: string) => {
         sender: true,
         seen: true
       },
-      orderBu: {
+      orderBy: {
         createdAt: 'asc'
       }
     });

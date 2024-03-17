@@ -9,13 +9,13 @@ export async function POST(
     const currentUser = await getCurrentUser();
     const body = await request.json();
     const {
-      userId, 
+      userId,
       isGroup,
       members,
       name
     } = body;
 
-    if (!currentUser?.id || !currentUser?.email ) {
+    if (!currentUser?.id || !currentUser?.email) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
@@ -33,17 +33,17 @@ export async function POST(
           isGroup,
           users: {
             connect: [
-              ...members.map((member : { value: string }) => ({
+              ...members.map((member: { value: string }) => ({
                 id: member.value
               })),
               {
                 id: currentUser.id
               }
             ]
-          },
-          include: {
-            users: true
           }
+        },
+        include: {
+          users: true
         }
       });
 
@@ -93,7 +93,7 @@ export async function POST(
     });
 
     return NextResponse.json(newConversation);
-  } catch (error : any) {
+  } catch (error: any) {
     return new NextResponse('Internal Errror', { status: 500 })
   }
 }
