@@ -33,7 +33,7 @@ const Conversation = async ({ params }: { params: IParams }) => {
     )}>
       <div className="h-full flex flex-col">
         <Header conversation={conversation} />
-        <Body messages={messages} user={currentUser} />
+        <Body messages={messages} currentUser={currentUser} users={conversation.users} />
         <Form />
       </div>
     </div>

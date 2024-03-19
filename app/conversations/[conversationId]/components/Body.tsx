@@ -1,23 +1,40 @@
-"use client";
-
 import { FullMessageType } from "@/app/types";
-import MessageBox from "./MessageBox";
 import { User } from "@prisma/client";
+
+import MessageList from "./MessageList";
 
 
 interface BodyProps {
   messages: FullMessageType[],
-  user: User | null
+  currentUser: User | null,
+  users: User[],
 }
 
-const Body: React.FC<BodyProps> = ({ messages, user }) => {
+const Body: React.FC<BodyProps> = ({ messages, currentUser, users }) => {
+  users = users.filter(u => u.id !== currentUser!.id);
+  const lastMessageSeenBy = calculateLastMessageSeenBy(messages, users);
+
   return (
-    <div className="flex-1 overflow-y-auto">
-      {messages.map((message) => (
-        <MessageBox message={message} user={user} />
-      ))}
-    </div>
+    <MessageList messages={messages} currentUser={currentUser} lastMessageSeenBy={lastMessageSeenBy} />
   )
 };
+
+const calculateLastMessageSeenBy = (messages: FullMessageType[], users: User[]) => {
+  const lastMessageSeenBy: User[][] = [];
+
+  messages.forEach(message => {
+    const messageSeenBy: User[] = []
+    users.forEach(user => {
+      const seenBy = message.seen.find(u => u.id === user.id);
+      if (seenBy) {
+        messageSeenBy.push(user);
+        users = users.filter(u => u.id !== user.id);
+      }
+    });
+    lastMessageSeenBy.push(messageSeenBy);
+  });
+
+  return lastMessageSeenBy;
+}
 
 export default Body;
