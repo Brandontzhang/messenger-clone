@@ -15,7 +15,7 @@ const Body: React.FC<BodyProps> = ({ messages, currentUser, users }) => {
   const lastMessageSeenBy = calculateLastMessageSeenBy(messages, users);
 
   return (
-    <MessageList messages={messages} currentUser={currentUser} lastMessageSeenBy={lastMessageSeenBy} />
+    <MessageList initialMessages={messages} lastMessageSeenBy={lastMessageSeenBy} />
   )
 };
 
