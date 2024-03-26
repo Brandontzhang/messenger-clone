@@ -8,12 +8,14 @@ import { MdOutlineGroupAdd } from "react-icons/md";
 import { FullConversationType } from "@/app/types";
 import useConversation from "@/app/hooks/useConversation";
 import ConversationBox from "./ConversationBox";
+import { User } from "@prisma/client";
 
 interface ConversationListProps {
-  initialItems: FullConversationType[];
+  initialItems: FullConversationType[],
+  currentUser: User,
 }
 
-const ConversationList: React.FC<ConversationListProps> = ({ initialItems }) => {
+const ConversationList: React.FC<ConversationListProps> = ({ initialItems, currentUser }) => {
   const [items, setItems] = useState(initialItems);
   const router = useRouter();
   const { conversationId, isOpen } = useConversation();
@@ -37,6 +39,7 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems }) => 
             key={item.id}
             data={item}
             selected={conversationId === item.id}
+            currentUser={currentUser}
           />
         ))}
       </div>

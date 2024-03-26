@@ -9,13 +9,15 @@ import clsx from "clsx";
 import { FullConversationType } from "@/app/types";
 import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
+import { User } from "@prisma/client";
 
 interface ConversationBoxProps {
   data: FullConversationType,
-  selected?: boolean
+  selected?: boolean,
+  currentUser: User,
 }
 
-const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => {
+const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, currentUser }) => {
   const otherUser = useOtherUser(data);
   const session = useSession();
   const router = useRouter();
@@ -77,7 +79,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => 
             `truncate text-sm`,
             hasSeen ? 'text-gray-500' : 'text-black font-medium'
           )}>
-            {lastMessageText}
+            {lastMessage.sender.id === currentUser.id ? "You" : lastMessage.sender.name}: {lastMessageText}
           </p>
         </div>
       </div>
