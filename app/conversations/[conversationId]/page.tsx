@@ -7,6 +7,7 @@ import Header from "./components/header";
 import Body from "./components/Body";
 import Form from "./components/Form";
 import getCurrentUser from "@/app/actions/getCurrentUser";
+import updateSeenByConversationId from "@/app/actions/updateSeenByConversationId";
 
 interface IParams {
   conversationId: string
@@ -27,13 +28,19 @@ const Conversation = async ({ params }: { params: IParams }) => {
     );
   }
 
+  updateSeenByConversationId(conversation.id);
+
   return (
     <div className={cn(
       "lg:pl-80 h-full lg:block"
     )}>
       <div className="h-full flex flex-col">
         <Header conversation={conversation} />
-        <Body messages={messages} currentUser={currentUser} users={conversation.users} />
+        <Body
+          messages={messages}
+          currentUser={currentUser}
+          users={conversation.users}
+        />
         <Form />
       </div>
     </div>

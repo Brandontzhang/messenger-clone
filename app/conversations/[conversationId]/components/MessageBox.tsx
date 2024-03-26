@@ -34,7 +34,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, dis
       isOwn && "bg-sky-500 text-white"
     ),
     timeHover: clsx(
-      "flex h-full items-center bg-gray-600 text-white h-fit p-1 rounded-md",
+      "flex items-center bg-gray-600 text-white h-fit py-1 px-4 rounded-md",
       isOwn ? "order-first" : "order-last",
       !hover && "hidden"
     ),
@@ -48,7 +48,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, dis
     <div className="flex flex-col relative">
       <div className="flex flex-col items-center" >
         <div className={styles.messageBox} >
-          {displayAvatar ? <Avatar user={message.sender} /> : <div className={styles.avatarPadding} ></div>}
+          {displayAvatar && !isOwn ? <Avatar user={message.sender} /> : <div className={styles.avatarPadding} ></div>}
           <div className={styles.messageBody} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
             {message.image ?
               <Image

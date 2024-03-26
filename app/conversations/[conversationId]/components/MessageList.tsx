@@ -3,8 +3,10 @@
 import { FullMessageType } from "@/app/types";
 import { User } from "@prisma/client";
 import MessageBox from "./MessageBox";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import axios from "axios";
+import { useParams } from "next/navigation";
 
 interface MessageListProps {
   initialMessages: FullMessageType[],
@@ -15,6 +17,12 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
   const [messages, setMessages] = useState(initialMessages);
   const bottomRef = useRef<HTMLDivElement>(null); // Used to scroll to the bottom 
   const session = useSession();
+
+  const { conversationId } = useParams<{ conversationId: string }>();
+
+  useEffect(() => {
+    axios.post(`/api/conversations/${conversationId}/seen`);
+  }, [conversationId])
 
   return (
     <div className="flex-1 flex flex-col-reverse overflow-y-auto py-2">

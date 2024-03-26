@@ -60,7 +60,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => 
     <div
       onClick={handleClick}
       className={clsx(
-        `w-full relative flex items-center space-x-3 hover:bg-neutral-100 rounded-lg transition cursor-pointer px-2 py-2`,
+        `w-full relative flex items-center space-x-3 hover:bg-neutral-100 rounded-lg troansition cursor-pointer px-2 py-2`,
         selected ? 'bg-neutral-100' : 'bg-white',
       )}
     >
