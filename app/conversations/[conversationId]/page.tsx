@@ -4,9 +4,6 @@ import getConversationById from "@/app/actions/getConversationById";
 import getMessages from "@/app/actions/getMessages";
 import EmptyState from "../../components/EmptyState";
 import Conversation from "./components/Conversation";
-import Header from "./components/header";
-import Body from "./components/Body";
-import Form from "./components/Form";
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import updateSeenByConversationId from "@/app/actions/updateSeenByConversationId";
 
