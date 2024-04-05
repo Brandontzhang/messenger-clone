@@ -2,7 +2,7 @@
 
 import { Conversation, User } from "@prisma/client";
 import useOtherUser from "@/app/hooks/useOtherUser";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { HiChevronLeft } from "react-icons/hi";
 import { HiEllipsisHorizontal } from "react-icons/hi2";
@@ -11,10 +11,11 @@ import Avatar from "@/app/components/Avatar";
 interface HeaderProps {
   conversation: Conversation & {
     users: User[]
-  }
+  },
+  toggleSettings: () => void,
 }
 
-const Header: React.FC<HeaderProps> = ({ conversation }) => {
+const Header: React.FC<HeaderProps> = ({ conversation, toggleSettings }) => {
   const otherUser = useOtherUser(conversation);
   const statusText = useMemo(() => {
     if (conversation.isGroup) {
@@ -45,9 +46,10 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
       <HiEllipsisHorizontal
         className="text-sky-500 cursor-pointer hover:text-sky-600 transition"
         size={32}
-        onClick={() => { }}
+        onClick={toggleSettings}
       />
     </div>
+
   )
 };
 
