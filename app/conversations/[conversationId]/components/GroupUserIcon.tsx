@@ -8,7 +8,7 @@ interface GroupUserIconProps {
 const GroupUserIcon: React.FC<GroupUserIconProps> = ({ users }) => {
   if (users.length === 1) {
     return (
-      <div className="absolute w-[7rem] h-[7rem] flex justify-center items-center">
+      <div className="relative w-[6rem] h-[6rem] flex justify-center items-center">
         <UserIcon
           className="md:h-16 md:w-16"
           user={users[0]}
@@ -18,7 +18,7 @@ const GroupUserIcon: React.FC<GroupUserIconProps> = ({ users }) => {
   }
 
   return (
-    <div className="absolute w-[7rem] h-[7rem] flex justify-center items-center">
+    <div className="relative w-[6rem] h-[6rem] flex justify-center items-center">
       <UserIcon
         className="absolute md:h-14 md:w-14 left-4 bottom-6 z-10 outline outline-white outline-2"
         user={users[0]}

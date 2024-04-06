@@ -11,7 +11,7 @@ interface UserIconProps {
 const UserIcon: React.FC<UserIconProps> = ({ user, className }) => {
   return (
     <div className={clsx(
-      "absolute inline-block rounded-full overflow-hidden h-9 w-9 md:h-11 md:w-11",
+      "relative inline-block rounded-full overflow-hidden h-9 w-9 md:h-11 md:w-11",
       className,
     )}>
       <Image alt="Avatar" src={user.image || '/images/placeholder.jpg'} fill />

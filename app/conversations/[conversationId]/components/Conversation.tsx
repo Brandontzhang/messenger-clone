@@ -5,7 +5,7 @@ import clsx from "clsx";
 import Form from "./Form";
 import Body from "./Body";
 import Header from "./header";
-import ConversationSettings from "./ConversationSettings";
+import ConversationSettings from "./ConversationSettings/ConversationSettings";
 
 import { FullMessageType } from "@/app/types";
 import { Conversation, User } from "@prisma/client";
