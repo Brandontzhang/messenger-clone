@@ -13,19 +13,32 @@ import {
   FaBellSlash,
   FaExclamationTriangle,
   FaChevronRight,
+  FaChevronDown,
 } from "react-icons/fa";
 import { FaArrowRightFromBracket } from "react-icons/fa6"
+import SettingOption from "./SettingOption";
+import { ReactNode, useState } from "react";
+import clsx from "clsx";
 
-interface SettingsOptionsProps {
+interface SettingsOptionHeadersProps {
   conversation: Conversation & {
     users: User[]
   },
-
 }
 
-const SettingsOptions: React.FC<SettingsOptionsProps> = ({ conversation }) => {
+type OptionSections = {
+  title: string,
+  isGroupOption?: boolean,
+  options: {
+    title: string,
+    icon?: ReactNode,
+    text?: string,
+    isGroupOption?: boolean,
+  }[]
+}
 
-  const optionSections = [
+const SettingsOptionHeaders: React.FC<SettingsOptionHeadersProps> = ({ conversation }) => {
+  const optionSections: OptionSections[] = [
     {
       title: "Chat Info",
       options: [
@@ -56,17 +69,19 @@ const SettingsOptions: React.FC<SettingsOptionsProps> = ({ conversation }) => {
         },
         {
           title: "Edit nicknames",
-          icon: <span>Aa</span>
+          icon: <span className="text-[0.75rem] leading-none">Aa</span>
         }
       ]
     },
+    // TODO: Handle no icons
     {
       title: "Group options",
       isGroupOption: true,
       options: [
         {
           title: "Require admin approval",
-          text: "Require an admin to approve all requests to join the group chat"
+          text: "Require an admin to approve all requests to join the group chat",
+          icon: <FaUserPlus />
         }
       ]
     },
@@ -118,19 +133,46 @@ const SettingsOptions: React.FC<SettingsOptionsProps> = ({ conversation }) => {
     }
   ]
 
+
+  const [showSectionOptions, setShowSectionOptions] = useState(optionSections.map(section => false));
+
   return (
     <div className="w-full">
       <ul className="flex flex-col w-full px-2">
-        {optionSections.map(section => {
+        {optionSections.map((section, index) => {
           const displaySection = (conversation.isGroup && section.isGroupOption) || !section.isGroupOption;
           if (displaySection) {
             return (
-              <li
-                key={section.title}
-                className="flex flex-row justify-between items-center px-2 py-3 rounded-md hover:bg-slate-50 cursor-pointer">
-                <span className="font-semibold text-sm">{section.title}</span>
-                <FaChevronRight />
-              </li>
+              <div key={section.title}>
+                <li
+                  key={section.title}
+                  className="flex flex-row justify-between items-center px-2 py-3 rounded-md hover:bg-slate-50 cursor-pointer"
+                  onClick={() => {
+                    setShowSectionOptions(prev => {
+                      const update = [...prev];
+                      update[index] = !prev[index];
+                      return update;
+                    })
+                  }}
+                >
+                  <span className="font-semibold text-sm">{section.title}</span>
+                  {showSectionOptions[index]}
+                  {showSectionOptions[index] ? <FaChevronDown /> : <FaChevronRight />}
+                </li>
+                <ul className={clsx(!showSectionOptions[index] && "hidden")}>
+                  {section.options.map((option, index) => {
+                    const displayOption = (conversation.isGroup && option.isGroupOption) || !option.isGroupOption;
+                    if (!displayOption) {
+                      return null;
+                    }
+                    return (
+                      <li key={`${option.title} ${index}`} className="flex flex-col justify-center px-2 text-sm py-3 rounded-md hover:bg-slate-50 cursor-pointer">
+                        <SettingOption title={option.title} icon={option.icon} text={option.text} />
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
             )
           } else {
             return null;
@@ -141,4 +183,4 @@ const SettingsOptions: React.FC<SettingsOptionsProps> = ({ conversation }) => {
   )
 };
 
-export default SettingsOptions;
+export default SettingsOptionHeaders;

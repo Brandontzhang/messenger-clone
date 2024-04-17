@@ -4,7 +4,7 @@ import { Conversation, User } from "@prisma/client";
 
 import GroupUserIcon from "../GroupUserIcon";
 import SettingButtons from "./SettingButtons";
-import SettingsOptions from "./SettingsOptions";
+import SettingsOptions from "./SettingsOptionHeaders";
 
 interface ConversationSettingsProps {
   className?: string,
