@@ -24,8 +24,12 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     axios.post(`/api/conversations/${conversationId}/seen`);
   }, [conversationId])
 
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
   return (
-    <div className="flex-1 flex flex-col-reverse overflow-y-auto py-2">
+    <div className="h-full flex-1 flex flex-col-reverse overflow-y-auto py-2">
       {messages.map((message: FullMessageType, index: number) => (
         <MessageBox
           key={message.id}
