@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 import clsx from "clsx";
 
-import { FullConversationType } from "@/app/types";
+import { FullConversationType, FullMessageType } from "@/app/types";
 import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
 import { User } from "@prisma/client";
@@ -26,7 +26,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
     router.push(`/conversations/${data.id}`);
   }, [data.id, router]);
 
-  // TODO if empty?
+  // TODO: if empty?
   const lastMessage = useMemo(() => {
     const messages = data.messages || [];
 
@@ -55,7 +55,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
       return lastMessage.body;
     }
 
-    return "Started a Conversation";
+    return "Start a Conversation";
   }, [lastMessage]);
 
   return (
@@ -79,7 +79,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
             `truncate text-sm`,
             hasSeen ? 'text-gray-500' : 'text-black font-medium'
           )}>
-            {lastMessage.sender.id === currentUser.id ? "You" : lastMessage.sender.name}: {lastMessageText}
+            {lastMessage ? `${lastMessage?.sender.id === currentUser.id ? "You" : lastMessage?.sender.name}: ${lastMessageText}` : "Start a conversation"}
           </p>
         </div>
       </div>

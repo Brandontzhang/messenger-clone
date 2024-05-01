@@ -7,6 +7,7 @@ import getCurrentUser from "../actions/getCurrentUser";
 const ConversationsLayout = async ({ children }: { children: React.ReactNode }) => {
   const currentUser = await getCurrentUser();
   const conversations = await getConversations();
+
   return (
     <Sidebar>
       <div className="h-full">
