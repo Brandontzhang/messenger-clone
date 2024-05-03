@@ -23,17 +23,17 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // On focus, update any new seen messages
-    // TODO: Test if this focus is occuring
-    window.addEventListener("focus", () => {
-      try {
-        axios.post(`/api/conversations/${conversationId}/seen`);
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    const updateSeenOnFocus = () => {
+      window.addEventListener("focus", () => {
+        try {
+          axios.post(`/api/conversations/${conversationId}/seen`);
+        } catch (err) {
+          console.log(err);
+        }
+      });
+    };
 
-    pusherClient.bind('seen:update', (updatedMessage: FullMessageType) => {
+    const seenUpdateEvent = (updatedMessage: FullMessageType) => {
       const updatedSeenUsers = updatedMessage.seen;
       setLastMessageSeenBy(current => {
         let updatedSeen: { [messageId: string]: User[] } = {};
@@ -48,10 +48,7 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
         updatedSeen[updatedMessage.id] = updatedSeenUsers.filter(user => user.id != currentUser!.id);
         return updatedSeen;
       });
-    });
-
-    pusherClient.subscribe(conversationId);
-    bottomRef?.current?.scrollIntoView();
+    };
 
     const messageHandler = (newMessage: FullMessageType) => {
       setMessages((current) => {
@@ -65,12 +62,20 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
 
         return newMessages;
       });
-
     };
 
+    updateSeenOnFocus();
+    pusherClient.subscribe(conversationId);
+    bottomRef?.current?.scrollIntoView();
+
+    pusherClient.bind('seen:update', seenUpdateEvent);
     pusherClient.bind('messages:new', messageHandler);
     bottomRef?.current?.scrollIntoView();
 
+    return () => {
+      pusherClient.unbind("messages:new");
+      pusherClient.unbind("seen:update");
+    }
   }, [conversationId]);
 
   useEffect(() => {

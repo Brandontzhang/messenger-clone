@@ -22,22 +22,14 @@ export const pusherClient = new PusherClient(
 // Subscribe and bind to the event in a useEffect hook
 // On unmount, unsubscribe and unbind
 //
-// TODO:
+// TODO: COMP took around 3 hours
 // What should happen when a message is sent for the sender?
 // 1. COMP The message is automatically displayed in the current users screen
-// 2. The message is seen by the current user
+// 2. COMP The message is seen by the current user
 // 3. COMP The newest message is updated in the conversations tab
-// 4. Conversation scrolls to the bottom
+// 4. COMP Conversation scrolls to the bottom
 //
 // TODO:
-// What should happen when a message is received?
-// 1. Automatically displayed on the current users screen if they are in the conversation
-// 2. Automatically updated in the users conversations list
-// 3. Seen status on the message is updated
-// 4. Conversation scrolls to the bottom 
-//
-// TODO:
-// Seen status should also automatically update whenever a user sees a message (pusher trigger for other users)
 // Extra: Handle edit messages (first update seen on messages, then allow editing as well)
 //
 // TODO:
