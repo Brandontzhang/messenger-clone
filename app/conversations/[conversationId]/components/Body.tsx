@@ -24,6 +24,7 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
 
   useEffect(() => {
     // On focus, update any new seen messages
+    // TODO: Test if this focus is occuring
     window.addEventListener("focus", () => {
       try {
         axios.post(`/api/conversations/${conversationId}/seen`);
@@ -32,10 +33,21 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
       }
     });
 
-    pusherClient.bind('seen:update', (updatedMessages: FullMessageType) => {
-      // console.log(updatedMessages);
-      // TODO: the old message state has not been updated when this event is triggered. Need to reconsider how seen states are handled
-      // console.log(messages);
+    pusherClient.bind('seen:update', (updatedMessage: FullMessageType) => {
+      const updatedSeenUsers = updatedMessage.seen;
+      setLastMessageSeenBy(current => {
+        let updatedSeen: { [messageId: string]: User[] } = {};
+        Object.entries(current).forEach(seenData => {
+          let [messageId, seenUsers] = seenData;
+
+          seenUsers = seenUsers.filter(user => !updatedSeenUsers.find(updatedUser => updatedUser.id == user.id));
+          if (seenUsers.length > 0) {
+            updatedSeen[messageId] = seenUsers;
+          }
+        });
+        updatedSeen[updatedMessage.id] = updatedSeenUsers.filter(user => user.id != currentUser!.id);
+        return updatedSeen;
+      });
     });
 
     pusherClient.subscribe(conversationId);

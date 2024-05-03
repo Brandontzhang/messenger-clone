@@ -37,8 +37,9 @@ export async function POST(
     }
 
     const lastMessage = conversation.messages[conversation.messages.length - 1];
+    const isLastMessageSeen = lastMessage.seenIds.includes(currentUser.id);
 
-    if (!lastMessage) {
+    if (!lastMessage || isLastMessageSeen) {
       return NextResponse.json(conversation);
     }
 
@@ -59,8 +60,6 @@ export async function POST(
       }
     });
 
-    // Trigger an event to update the seen by whenever a conversation is viewed by the user, how to check in focus?
-    // ... should I track the last seen message by id instead...
     await pusherServer.trigger(conversation.id, 'seen:update', updatedMessage);
 
     return NextResponse.json(updatedMessage);
