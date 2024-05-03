@@ -13,7 +13,7 @@ import { format } from "date-fns";
 
 interface MessageBoxProps {
   message: FullMessageType,
-  lastMessageSeenBy: User[],
+  lastMessageSeenBy: { [messageId: string]: User[] },
   displayAvatar: boolean,
 }
 
@@ -65,7 +65,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, dis
           </div>
         </div>
       </div>
-      <SeenBox users={lastMessageSeenBy} />
+      <SeenBox users={lastMessageSeenBy[message.id]} />
     </div>
   )
 

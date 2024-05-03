@@ -24,9 +24,9 @@ export const pusherClient = new PusherClient(
 //
 // TODO:
 // What should happen when a message is sent for the sender?
-// 1. The message is automatically displayed in the current users screen
+// 1. COMP The message is automatically displayed in the current users screen
 // 2. The message is seen by the current user
-// 3. The newest message is updated in the conversations tab
+// 3. COMP The newest message is updated in the conversations tab
 // 4. Conversation scrolls to the bottom
 //
 // TODO:

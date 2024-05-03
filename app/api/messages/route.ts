@@ -39,7 +39,6 @@ export async function POST(request: Request) {
       }
     });
 
-    // TODO used for pusher? Whatever that is
     const updatedConversation = await prisma.conversation.update({
       where: {
         id: conversationId

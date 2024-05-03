@@ -1,7 +1,7 @@
 import prisma from "@/app/libs/prismadb";
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/app/actions/getCurrentUser";
-import { FullMessageType } from "@/app/types";
+import { pusherServer } from "@/app/libs/pusher";
 
 interface IParams {
   conversationId?: string
@@ -42,7 +42,7 @@ export async function POST(
       return NextResponse.json(conversation);
     }
 
-    const updatedMessage = prisma.message.update({
+    const updatedMessage = await prisma.message.update({
       where: {
         id: lastMessage.id
       },
@@ -58,6 +58,10 @@ export async function POST(
         }
       }
     });
+
+    // Trigger an event to update the seen by whenever a conversation is viewed by the user, how to check in focus?
+    // ... should I track the last seen message by id instead...
+    await pusherServer.trigger(conversation.id, 'seen:update', updatedMessage);
 
     return NextResponse.json(updatedMessage);
   } catch (error: any) {

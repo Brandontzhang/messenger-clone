@@ -10,7 +10,7 @@ import { useParams } from "next/navigation";
 
 interface MessageListProps {
   initialMessages: FullMessageType[],
-  lastMessageSeenBy: User[][],
+  lastMessageSeenBy: { [messageId: string]: User[] },
 }
 
 const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageSeenBy }) => {
@@ -34,7 +34,7 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
         <MessageBox
           key={message.id}
           message={message}
-          lastMessageSeenBy={lastMessageSeenBy[index]}
+          lastMessageSeenBy={lastMessageSeenBy}
           displayAvatar={index === 0 ? message.sender.email !== session.data?.user?.email : message.senderId !== messages[index - 1].senderId}
         />
       ))}

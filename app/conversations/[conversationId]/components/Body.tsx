@@ -3,9 +3,10 @@ import { User } from "@prisma/client";
 
 import MessageList from "./MessageList";
 import { useEffect, useRef, useState } from "react";
-import { pusherClient } from "@/app/libs/pusher";
+import { pusherClient, pusherServer } from "@/app/libs/pusher";
 import useConversation from "@/app/hooks/useConversation";
 import { find } from "lodash";
+import axios from "axios";
 
 
 interface BodyProps {
@@ -17,11 +18,26 @@ interface BodyProps {
 const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
   const [messages, setMessages] = useState(initialMessages);
   users = users.filter(u => u.id !== currentUser!.id);
-  const lastMessageSeenBy = calculateLastMessageSeenBy(messages, users);
+  const [lastMessageSeenBy, setLastMessageSeenBy] = useState(calculateLastMessageSeenBy(messages, users));
   const { conversationId } = useConversation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // On focus, update any new seen messages
+    window.addEventListener("focus", () => {
+      try {
+        axios.post(`/api/conversations/${conversationId}/seen`);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    pusherClient.bind('seen:update', (updatedMessages: FullMessageType) => {
+      // console.log(updatedMessages);
+      // TODO: the old message state has not been updated when this event is triggered. Need to reconsider how seen states are handled
+      // console.log(messages);
+    });
+
     pusherClient.subscribe(conversationId);
     bottomRef?.current?.scrollIntoView();
 
@@ -31,13 +47,21 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
         if (existingMessage) {
           return current;
         }
-        return [newMessage, ...current];
+
+        let newMessages = [newMessage, ...current];
+        setLastMessageSeenBy(calculateLastMessageSeenBy(newMessages, users));
+
+        return newMessages;
       });
+
     };
 
     pusherClient.bind('messages:new', messageHandler);
     bottomRef?.current?.scrollIntoView();
-    // TODO: mark message as seen
+
+  }, [conversationId]);
+
+  useEffect(() => {
   }, [conversationId]);
 
   return (
@@ -49,18 +73,20 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
 };
 
 const calculateLastMessageSeenBy = (messages: FullMessageType[], users: User[]) => {
-  const lastMessageSeenBy: User[][] = [];
+  const lastMessageSeenBy: { [messageId: string]: User[] } = {};
+  let remainingUsers = [...users];
 
   messages.forEach(message => {
-    const messageSeenBy: User[] = []
-    users.forEach(user => {
-      const seenBy = message.seen.find(u => u.id === user.id);
-      if (seenBy) {
-        messageSeenBy.push(user);
-        users = users.filter(u => u.id !== user.id);
-      }
-    });
-    lastMessageSeenBy.push(messageSeenBy);
+    if (remainingUsers.length === 0) {
+      return;
+    }
+
+    const intersection = remainingUsers.filter(user => message.seenIds.includes(user.id));
+    if (intersection.length > 0) {
+      lastMessageSeenBy[message.id] = intersection;
+
+      remainingUsers = remainingUsers.filter(userId => !intersection.includes(userId));
+    };
   });
 
   return lastMessageSeenBy;
