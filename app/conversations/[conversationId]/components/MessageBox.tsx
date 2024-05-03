@@ -24,8 +24,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, dis
 
   const styles = {
     messageBox: clsx(
-      "flex flex-row gap-x-3 py-1 px-4 w-full items-center",
-      displayAvatar ? "py-2" : "py-0.5",
+      "flex flex-row gap-x-3 py-1 px-4 w-full items-center py-0.5",
       isOwn ? "justify-end" : "justify-start"
     ),
     messageBody: clsx(
