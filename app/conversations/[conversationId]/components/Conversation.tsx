@@ -34,7 +34,9 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, messages, cur
           currentUser={currentUser}
           users={conversation.users}
         />
-        <Form />
+        <Form
+          messageLength={messages.length}
+        />
       </div>
       <ConversationSettings
         className={clsx(!openSettings && "hidden")}

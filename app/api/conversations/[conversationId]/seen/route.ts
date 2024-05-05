@@ -37,7 +37,7 @@ export async function POST(
     }
 
     const lastMessage = conversation.messages[conversation.messages.length - 1];
-    const isLastMessageSeen = lastMessage.seenIds.includes(currentUser.id);
+    const isLastMessageSeen = lastMessage?.seenIds?.includes(currentUser.id);
 
     if (!lastMessage || isLastMessageSeen) {
       return NextResponse.json(conversation);

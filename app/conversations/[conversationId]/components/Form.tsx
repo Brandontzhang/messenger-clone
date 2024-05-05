@@ -8,8 +8,11 @@ import { CldUploadButton } from "next-cloudinary";
 
 import MessageInput from "./MessageInput";
 
+interface FormProps {
+  messageLength: number
+}
 
-const Form = () => {
+const Form: React.FC<FormProps> = ({ messageLength }) => {
   const { conversationId } = useConversation();
   const {
     register,
@@ -29,6 +32,7 @@ const Form = () => {
 
     axios.post("/api/messages", {
       ...data,
+      messageLength,
       conversationId
     });
   };
