@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
@@ -10,6 +10,7 @@ import { FullConversationType, FullMessageType } from "@/app/types";
 import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
 import { User } from "@prisma/client";
+import { pusherClient } from "@/app/libs/pusher";
 
 interface ConversationBoxProps {
   data: FullConversationType,
@@ -21,17 +22,15 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
   const otherUser = useOtherUser(data);
   const session = useSession();
   const router = useRouter();
+  const [messages, setMessages] = useState<FullMessageType[]>(data.messages);
 
   const handleClick = useCallback(() => {
     router.push(`/conversations/${data.id}`);
   }, [data.id, router]);
 
-  // TODO: if empty?
   const lastMessage = useMemo(() => {
-    const messages = data.messages || [];
-
-    return messages[messages.length - 1];
-  }, [data.messages]);
+    return messages.length > 0 ? messages[messages.length - 1] : null;
+  }, [messages]);
 
   const userEmail = useMemo(() => {
     return session.data?.user?.email;
@@ -49,14 +48,41 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
   const lastMessageText = useMemo(() => {
     if (lastMessage?.image) {
       return 'Sent an image';
-    }
-
-    if (lastMessage?.body) {
+    } else if (lastMessage?.body) {
       return lastMessage.body;
+    } else {
+      return "Start a Conversation";
+    }
+  }, [lastMessage]);
+
+  useEffect(() => {
+    const conversationUpdateHandler = (updateData: { id: string, messages: FullMessageType[] }) => {
+      const { id, messages } = updateData;
+      if (id === data.id) {
+        setMessages((current: FullMessageType[]) => {
+          return [...current, ...messages];
+        });
+      };
+    };
+
+    const seenUpdateHandler = (lastMessage: FullMessageType) => {
+      if (lastMessage.conversationId === data.id) {
+        setMessages((current: FullMessageType[]) => {
+          return [...current, lastMessage];
+        });
+      }
     }
 
-    return "Start a Conversation";
-  }, [lastMessage]);
+    if (userEmail) {
+      pusherClient.subscribe(userEmail!);
+      pusherClient.bind("conversation:update", conversationUpdateHandler);
+      pusherClient.bind("seen:update", seenUpdateHandler);
+    }
+    return () => {
+      pusherClient.unbind("conversation:update");
+      pusherClient.unbind("seen:update");
+    };
+  }, [userEmail]);
 
   return (
     <div
