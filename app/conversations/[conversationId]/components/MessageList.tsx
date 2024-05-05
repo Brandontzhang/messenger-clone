@@ -33,7 +33,7 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
 
   const calculateMessageDate = (message: FullMessageType, index: number) => {
     let dateString = "";
-    let createdAt = DateTime.fromJSDate(message.createdAt);
+    let createdAt = DateTime.fromJSDate(new Date(message.createdAt));
     let year = createdAt.get('year');
     let month = createdAt.get('monthShort');
     let day = createdAt.get('day');
@@ -47,19 +47,22 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     dateString = `${month} ${day}, ${year} AT ${hourString}:${minuteString} ${period}`;
 
     let prevMessage = index != messages.length ? messages[index + 1] : null;
+    let curDif = createdAt.diffNow().get("milliseconds") / -60000;
+
+    if (curDif < 1440) {
+      dateString = `${hourString}:${minuteString} ${period}`;
+    } else if (curDif < 10080) {
+      dateString = `${weekday}, ${hourString}:${minuteString} ${period}`;
+    } else {
+      dateString = `${month} ${day}, ${year} AT ${hourString}:${minuteString} ${period}`;
+    }
+
     if (prevMessage) {
       let prevMessageCreatedAt = DateTime.fromJSDate(prevMessage.createdAt);
       let minDif = createdAt.diff(prevMessageCreatedAt).get('milliseconds') / 60000;
-      let curDif = createdAt.diffNow().get("milliseconds") / -60000;
 
       if (minDif <= 20) {
         dateString = "";
-      } else if (curDif < 1440) {
-        dateString = `${hourString}:${minuteString} ${period}`;
-      } else if (curDif < 10080) {
-        dateString = `${weekday}, ${hourString}:${minuteString} ${period}`;
-      } else {
-        dateString = `${month} ${day}, ${year} AT ${hourString}:${minuteString} ${period}`;
       }
     }
 
