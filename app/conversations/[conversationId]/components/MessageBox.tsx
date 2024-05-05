@@ -15,9 +15,10 @@ interface MessageBoxProps {
   message: FullMessageType,
   lastMessageSeenBy: { [messageId: string]: User[] },
   displayAvatar: boolean,
+  date?: string,
 }
 
-const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, displayAvatar }) => {
+const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, displayAvatar, date }) => {
   const session = useSession();
   const isOwn = session.data?.user?.email === message.sender.email;
   const [hover, setHover] = useState(false);
@@ -46,6 +47,12 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, lastMessageSeenBy, dis
   return (
     <div className="flex flex-col relative">
       <div className="flex flex-col items-center" >
+        <div className={clsx(
+          !date && "hidden",
+          "my-6 text-gray-500 font-light"
+        )}>
+          {date}
+        </div>
         <div className={styles.messageBox} >
           {displayAvatar && !isOwn ? <Avatar user={message.sender} /> : <div className={styles.avatarPadding} ></div>}
           <div className={styles.messageBody} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
