@@ -34,7 +34,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
     };
 
     const seenUpdateEvent = (updatedMessage: FullMessageType) => {
-      console.log("shouldn't this be occuring?");
       const updatedSeenUsers = updatedMessage.seen;
       setLastMessageSeenBy(current => {
         let updatedSeen: { [messageId: string]: User[] } = {};

@@ -43,6 +43,7 @@ export async function POST(
       return NextResponse.json(conversation);
     }
 
+    // TODO: There is a bug with the seen, each user has too many seen messages tracked on it that can't be sent through pusher 
     const updatedMessage = await prisma.message.update({
       where: {
         id: lastMessage.id
@@ -59,6 +60,10 @@ export async function POST(
         }
       }
     });
+
+    // WARN: Wiping out so pusher can send, but on receiving the push even cannot expect the seen message ids. This is going against the types...
+    // Not good design. 
+    updatedMessage.sender.seenMessageIds = [];
 
     await pusherServer.trigger(conversation.id, 'seen:update', updatedMessage);
 

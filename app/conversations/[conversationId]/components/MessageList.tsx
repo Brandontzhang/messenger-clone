@@ -58,7 +58,7 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     }
 
     if (prevMessage) {
-      let prevMessageCreatedAt = DateTime.fromJSDate(prevMessage.createdAt);
+      let prevMessageCreatedAt = DateTime.fromJSDate(new Date(prevMessage.createdAt));
       let minDif = createdAt.diff(prevMessageCreatedAt).get('milliseconds') / 60000;
 
       if (minDif <= 20) {
@@ -77,8 +77,8 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
 
     // Message chain broken by date display
     if (message.senderId === messages[messageIndex - 1].senderId) {
-      const prevCreatedAt = DateTime.fromJSDate(messages[messageIndex - 1].createdAt);
-      const curCreatedAt = DateTime.fromJSDate(messages[messageIndex].createdAt);
+      const prevCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex - 1].createdAt));
+      const curCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex].createdAt));
       let dif = prevCreatedAt.diff(curCreatedAt).get('milliseconds') / 60000;
 
       return dif > 20;

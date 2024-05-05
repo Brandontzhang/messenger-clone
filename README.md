@@ -1,10 +1,13 @@
 ## Notes for the future
-- Additional Items to consider for future projects:
+### Additional Items to consider for future projects:
   - How do sockets actually work? Is there another server managing the calls? Seems to be like so for Pusher. How would I create one myself?
   - State management across child components. useContext is a bit annoying, maybe look into Redux?
+### Database (Prisma)
+  - Relationships need to be defined on both models as defined within Prisma
+  - Information can be lost if only tracked on one model
 
 ## Additional Features to Implement
-- Pagination for messages
+### Pagination for messages
   - Offset Pagination:
     - two additional parameters are added to the database query
       - offset: how many records to skip before we reach the data we're looking for
@@ -26,9 +29,9 @@
       - Refreshes are triggered through the client Body component
         - Ok to update the message state
 
-- Group messaging
-- Message editing
-- Conversation Settings
+### Group messaging
+### Message editing
+### Conversation Settings
   - Pinned messages
   - Conversation Themes
   - Icons
