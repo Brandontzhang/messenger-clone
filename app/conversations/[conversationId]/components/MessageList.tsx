@@ -66,19 +66,35 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     return dateString;
   }
 
+  const displayAvatar = (message: FullMessageType, messageIndex: number) => {
+    if (messageIndex === 0) {
+      // The last message sent
+      return message.sender.email !== session.data?.user?.email;
+    }
+
+    // Message chain broken by date display
+    if (message.senderId === messages[messageIndex - 1].senderId) {
+      const prevCreatedAt = DateTime.fromJSDate(messages[messageIndex - 1].createdAt);
+      const curCreatedAt = DateTime.fromJSDate(messages[messageIndex].createdAt);
+      let dif = prevCreatedAt.diff(curCreatedAt).get('milliseconds') / 60000;
+
+      return dif > 20;
+    }
+
+    return true;
+  }
+
   return (
     <div className="h-full flex-1 flex flex-col-reverse overflow-y-auto py-2">
-      {messages.map((message: FullMessageType, index: number) => {
-        return (
-          <MessageBox
-            key={message.id}
-            message={message}
-            lastMessageSeenBy={lastMessageSeenBy}
-            displayAvatar={index === 0 ? message.sender.email !== session.data?.user?.email : message.senderId !== messages[index - 1].senderId}
-            date={calculateMessageDate(message, index)}
-          />
-        )
-      })}
+      {messages.map((message: FullMessageType, index: number) => (
+        <MessageBox
+          key={message.id}
+          message={message}
+          lastMessageSeenBy={lastMessageSeenBy}
+          displayAvatar={displayAvatar(message, index)}
+          date={calculateMessageDate(message, index)}
+        />
+      ))}
       <div ref={bottomRef} className="pt-24" />
     </div>
   )
