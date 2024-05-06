@@ -43,7 +43,6 @@ export async function POST(
       return NextResponse.json(conversation);
     }
 
-    // TODO: There is a bug with the seen, each user has too many seen messages tracked on it that can't be sent through pusher 
     const updatedMessage = await prisma.message.update({
       where: {
         id: lastMessage.id
