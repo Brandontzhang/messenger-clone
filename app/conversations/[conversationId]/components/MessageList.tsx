@@ -17,18 +17,22 @@ interface MessageListProps {
 }
 
 const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageSeenBy }) => {
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState(initialMessages.toReversed());
   const bottomRef = useRef<HTMLDivElement>(null); // Used to scroll to the bottom 
   const session = useSession();
 
   const { conversationId } = useParams<{ conversationId: string }>();
 
   useEffect(() => {
+    bottomRef.current?.scrollIntoView();
+  }, []);
+
+  useEffect(() => {
     axios.post(`/api/conversations/${conversationId}/seen`);
   }, [conversationId])
 
   useEffect(() => {
-    setMessages(initialMessages);
+    setMessages(initialMessages.toReversed());
   }, [initialMessages]);
 
   const calculateMessageDate = (message: FullMessageType, index: number) => {
@@ -46,10 +50,11 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     let minuteString = minute < 10 ? `0${minute}` : minute;
     dateString = `${month} ${day}, ${year} AT ${hourString}:${minuteString} ${period}`;
 
-    let prevMessage = index != messages.length ? messages[index + 1] : null;
+    let prevMessage = index != 0 ? messages[index - 1] : null;
     let curDif = createdAt.diffNow().get("milliseconds") / -60000;
+    let sameDay = createdAt.hasSame(DateTime.now(), "day");
 
-    if (curDif < 1440) {
+    if (curDif < 1440 && sameDay) {
       dateString = `${hourString}:${minuteString} ${period}`;
     } else if (curDif < 10080) {
       dateString = `${weekday}, ${hourString}:${minuteString} ${period}`;
@@ -71,12 +76,11 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
 
   const displayAvatar = (message: FullMessageType, messageIndex: number) => {
     // The last message sent
-    if (messageIndex === 0) {
+    if (messageIndex === messages.length - 1) {
       return message.sender.email !== session.data?.user?.email;
     }
 
-    // Message chain broken by date display
-    if (message.senderId === messages[messageIndex - 1].senderId) {
+    if (messageIndex != 0 && message.senderId === messages[messageIndex - 1].senderId) {
       const prevCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex - 1].createdAt));
       const curCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex].createdAt));
       let dif = prevCreatedAt.diff(curCreatedAt).get('milliseconds') / 60000;
@@ -87,8 +91,16 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     return true;
   }
 
+  const handleScroll = (event: any) => {
+    const { scrollTop } = event.target;
+
+    if (scrollTop <= 10) {
+      // TODO: Add pagination here
+    }
+  }
+
   return (
-    <div className="h-full flex-1 flex flex-col-reverse overflow-y-auto py-2">
+    <div onScroll={(e) => handleScroll(e)} className="h-full flex-1 flex flex-col overflow-y-auto py-2">
       {messages.map((message: FullMessageType, index: number) => (
         <MessageBox
           key={message.id}
@@ -98,7 +110,7 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
           date={calculateMessageDate(message, index)}
         />
       ))}
-      <div ref={bottomRef} className="pt-24" />
+      <div ref={bottomRef} />
     </div>
   )
 };
