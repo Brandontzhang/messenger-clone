@@ -1,11 +1,11 @@
 import { cn } from "@/util/common";
 
 import getConversationById from "@/app/actions/getConversationById";
-import getMessages from "@/app/actions/getMessages";
 import EmptyState from "../../components/EmptyState";
 import Conversation from "./components/Conversation";
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import updateSeenByConversationId from "@/app/actions/updateSeenByConversationId";
+import getInitialMessages from "@/app/actions/getInitialMessages";
 
 interface IParams {
   conversationId: string
@@ -13,7 +13,7 @@ interface IParams {
 
 const ConversationPage = async ({ params }: { params: IParams }) => {
   const conversation = await getConversationById(params.conversationId);
-  const messages = await getMessages(params.conversationId);
+  const messages = await getInitialMessages(params.conversationId);
   const currentUser = await getCurrentUser();
 
   if (!conversation) {

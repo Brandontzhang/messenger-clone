@@ -24,10 +24,6 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
   const { conversationId } = useParams<{ conversationId: string }>();
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView();
-  }, []);
-
-  useEffect(() => {
     axios.post(`/api/conversations/${conversationId}/seen`);
   }, [conversationId])
 

@@ -3,7 +3,7 @@ import { User } from "@prisma/client";
 
 import MessageList from "./MessageList";
 import { useEffect, useRef, useState } from "react";
-import { pusherClient, pusherServer } from "@/app/libs/pusher";
+import { pusherClient } from "@/app/libs/pusher";
 import useConversation from "@/app/hooks/useConversation";
 import { find } from "lodash";
 import axios from "axios";
@@ -80,7 +80,7 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
   }, [conversationId]);
 
   return (
-    <div className="h-full">
+    <div className="h-full overflow-y-scroll ">
       <MessageList initialMessages={messages} lastMessageSeenBy={lastMessageSeenBy} />
       <div ref={bottomRef} />
     </div>

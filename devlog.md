@@ -41,3 +41,4 @@
       - This... might not be possible? Don't see any documentation for it. 
     3. On logout, disconnect connections. If 2 is not possible, also need to disconnect when closed or restarted. It's supposed to be doing this automatically?
       - Maybe it's because I'm in dev
+  - This looks like it might be an issue with hot reloading in development.
