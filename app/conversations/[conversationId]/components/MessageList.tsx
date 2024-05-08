@@ -18,6 +18,7 @@ interface MessageListProps {
 
 const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageSeenBy }) => {
   const [messages, setMessages] = useState(initialMessages.toReversed());
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null); // Used to scroll to the bottom 
   const session = useSession();
 
@@ -31,6 +32,22 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     setMessages(initialMessages.toReversed());
     bottomRef.current?.scrollIntoView();
   }, [initialMessages]);
+
+  useEffect(() => {
+    if (loadingMessages) {
+      axios.get(`/api/messages`, {
+        params: {
+          conversationId: conversationId,
+          messageId: messages[0].id,
+        }
+      }).then((data) => {
+        const { data: newMessages } = data;
+        setMessages((current) => [...newMessages.toReversed(), ...current]);
+      }).finally(() => {
+        setLoadingMessages(false)
+      });
+    }
+  }, [loadingMessages]);
 
   const calculateMessageDate = (message: FullMessageType, index: number) => {
     let dateString = "";
@@ -77,10 +94,10 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
       return message.sender.email !== session.data?.user?.email;
     }
 
-    if (messageIndex != 0 && message.senderId === messages[messageIndex - 1].senderId) {
-      const prevCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex - 1].createdAt));
+    if (messageIndex != messages.length - 1 && message.senderId === messages[messageIndex + 1].senderId) {
       const curCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex].createdAt));
-      let dif = prevCreatedAt.diff(curCreatedAt).get('milliseconds') / 60000;
+      const nextCreatedAt = DateTime.fromJSDate(new Date(messages[messageIndex + 1].createdAt));
+      let dif = curCreatedAt.diff(nextCreatedAt).get('milliseconds') / 60000;
 
       return dif > 20;
     }
@@ -88,16 +105,13 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
     return true;
   }
 
-  const handleScroll = (event: any) => {
-    const { scrollTop } = event.target;
-
-    if (scrollTop <= 10) {
-      // TODO: Add pagination here
-    }
+  const handleScroll = async (event: any) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    setLoadingMessages((scrollHeight + scrollTop) <= clientHeight);
   }
 
   return (
-    <div onScroll={(e) => handleScroll(e)} className="h-full flex-1 flex flex-col overflow-y-auto py-2">
+    <div onScroll={(e) => handleScroll(e)} className="h-full flex-1 flex flex-col justify-end overflow-y-auto py-2">
       {messages.map((message: FullMessageType, index: number) => (
         <MessageBox
           key={message.id}

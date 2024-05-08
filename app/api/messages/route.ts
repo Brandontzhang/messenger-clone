@@ -1,5 +1,5 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
 import { pusherServer } from "@/app/libs/pusher";
 
@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
     const body = await request.json();
-    const { message, image, messageLength, conversationId } = body;
+    const { message, image, conversationId } = body;
 
     if (!currentUser?.id || !currentUser?.email) {
       return new NextResponse('Unauthorized', { status: 401 });
@@ -15,7 +15,6 @@ export async function POST(request: Request) {
 
     const newMessage = await prisma.message.create({
       data: {
-        index: messageLength + 1,
         body: message,
         image: image,
         conversation: {
@@ -79,3 +78,34 @@ export async function POST(request: Request) {
     return new NextResponse('Internal Error', { status: 500 });
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const messageId = searchParams.get("messageId");
+    const conversationId = searchParams.get("conversationId");
+
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: conversationId!
+      },
+      take: 20,
+      skip: messageId ? 1 : undefined,
+      cursor: messageId ? { id: messageId! } : undefined,
+      include: {
+        sender: true,
+        seen: true
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(messages);
+  } catch (error: any) {
+    console.log(error, 'ERROR_MESSAGES');
+    return new NextResponse('Internal Error', { status: 500 });
+  }
+
+}
+
