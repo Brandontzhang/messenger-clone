@@ -58,6 +58,7 @@ const AuthForm = () => {
           }
 
           if (callback?.ok && !callback?.error) {
+            // TODO: Add socket authentication here? But what is the socket id? (In the client)
             toast.success('Logged In');
           }
         })
