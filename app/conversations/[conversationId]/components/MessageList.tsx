@@ -33,6 +33,7 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
 
   useEffect(() => {
     setMessages(initialMessages.toReversed());
+    bottomRef.current?.scrollIntoView();
   }, [initialMessages]);
 
   const calculateMessageDate = (message: FullMessageType, index: number) => {
