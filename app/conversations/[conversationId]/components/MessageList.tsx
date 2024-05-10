@@ -91,7 +91,7 @@ const MessageList: React.FC<MessageListProps> = ({ initialMessages, lastMessageS
   const displayAvatar = (message: FullMessageType, messageIndex: number) => {
     // The last message sent
     if (messageIndex === messages.length - 1) {
-      return message.sender.email !== session.data?.user?.email;
+      return message.sender?.email !== session.data?.user?.email;
     }
 
     if (messageIndex != messages.length - 1 && message.senderId === messages[messageIndex + 1].senderId) {

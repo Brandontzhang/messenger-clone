@@ -63,8 +63,13 @@ export async function POST(
     // WARN: Wiping out so pusher can send, but on receiving the push even cannot expect the seen message ids. This is going against the types...
     // Not good design. 
     updatedMessage.sender.seenMessageIds = [];
+    updatedMessage.seen.forEach(user => user.seenMessageIds = []);
 
-    await pusherServer.trigger(conversation.id, 'seen:update', updatedMessage);
+    await pusherServer.trigger(conversation.id, 'seen:update', updatedMessage).
+      catch((e: any) => {
+        console.log(`Seen Update error: ${e}`);
+        console.log(updatedMessage);
+      });
 
     return NextResponse.json(updatedMessage);
   } catch (error: any) {

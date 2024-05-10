@@ -62,14 +62,25 @@ export async function POST(request: Request) {
       }
     });
 
-    await pusherServer.trigger(conversationId, 'messages:new', newMessage);
+    newMessage.sender.seenMessageIds = [];
+    await pusherServer.trigger(conversationId, 'messages:new', newMessage).
+      catch(e => {
+        console.log(`New Message Error: ${e}`);
+      });
 
     const lastMessage = updatedConversation.messages[updatedConversation.messages.length - 1];
+    // WARN: removing due to pusher size limit
+    lastMessage.sender.seenMessageIds = [];
     updatedConversation.users.map(user => {
-      pusherServer.trigger(user.email!, 'conversation:update', {
+      const data = {
         id: conversationId,
         messages: [lastMessage],
-      });
+      };
+      pusherServer.trigger(user.email!, 'conversation:update', data).
+        catch((e: any) => {
+          console.log(`Conversation Update Error: ${e}`);
+          console.log(data);
+        });
     });
 
     return NextResponse.json(newMessage);

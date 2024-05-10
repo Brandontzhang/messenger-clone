@@ -18,9 +18,29 @@ interface BodyProps {
 const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
   const [messages, setMessages] = useState(initialMessages);
   users = users.filter(u => u.id !== currentUser!.id);
-  const [lastMessageSeenBy, setLastMessageSeenBy] = useState(calculateLastMessageSeenBy(messages, users));
   const { conversationId } = useConversation();
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const calculateLastMessageSeenBy = (messages: FullMessageType[], users: User[]) => {
+    const lastMessageSeenBy: { [messageId: string]: User[] } = {};
+    let remainingUsers = users.filter(user => user.id !== currentUser!.id);
+
+    messages.forEach(message => {
+      if (remainingUsers.length === 0) {
+        return;
+      }
+
+      const intersection = remainingUsers.filter(user => message.seenIds.includes(user.id));
+      if (intersection.length > 0) {
+        lastMessageSeenBy[message.id] = intersection;
+
+        remainingUsers = remainingUsers.filter(userId => !intersection.includes(userId));
+      };
+    });
+
+    return lastMessageSeenBy;
+  }
+  const [lastMessageSeenBy, setLastMessageSeenBy] = useState(calculateLastMessageSeenBy(messages, users));
 
   useEffect(() => {
     const updateSeenOnFocus = () => {
@@ -33,24 +53,23 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
       });
     };
 
-    const seenUpdateEvent = (updatedMessage: FullMessageType) => {
-      const updatedSeenUsers = updatedMessage.seen;
+    const seenUpdateHandler = (updatedMessage: FullMessageType) => {
       setLastMessageSeenBy(current => {
         let updatedSeen: { [messageId: string]: User[] } = {};
         Object.entries(current).forEach(seenData => {
           let [messageId, seenUsers] = seenData;
 
-          seenUsers = seenUsers.filter(user => !updatedSeenUsers.find(updatedUser => updatedUser.id == user.id));
+          seenUsers = seenUsers.filter(user => !updatedMessage.seen.find(updatedUser => updatedUser.id == user.id));
           if (seenUsers.length > 0) {
             updatedSeen[messageId] = seenUsers;
           }
         });
-        updatedSeen[updatedMessage.id] = updatedSeenUsers.filter(user => user.id != currentUser!.id);
+        updatedSeen[updatedMessage.id] = updatedMessage.seen.filter(user => user.id != currentUser!.id);
         return updatedSeen;
       });
     };
 
-    const messageHandler = (newMessage: FullMessageType) => {
+    const newMessageHandler = (newMessage: FullMessageType) => {
       setMessages((current) => {
         let existingMessage = find(current, (m: FullMessageType) => m.id === newMessage.id);
         if (existingMessage) {
@@ -58,6 +77,8 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
         }
 
         let newMessages = [newMessage, ...current];
+
+        // TODO: There's a bug affecting the seen when a new message is sent, must be an error here
         setLastMessageSeenBy(calculateLastMessageSeenBy(newMessages, users));
 
         return newMessages;
@@ -68,13 +89,21 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
     pusherClient.subscribe(conversationId);
     bottomRef?.current?.scrollIntoView();
 
-    pusherClient.bind('seen:update', seenUpdateEvent);
-    pusherClient.bind('messages:new', messageHandler);
+    pusherClient.bind_global((event: string, message: FullMessageType) => {
+      switch (event) {
+        case "messages:new":
+          newMessageHandler(message);
+          break;
+        case "seen:update":
+          seenUpdateHandler(message);
+        default:
+      }
+    });
+
     bottomRef?.current?.scrollIntoView();
 
     return () => {
-      pusherClient.unbind("messages:new");
-      pusherClient.unbind("seen:update");
+      pusherClient.unbind_global();
       pusherClient.unsubscribe(conversationId);
     }
   }, [conversationId]);
@@ -86,25 +115,5 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
     </div>
   )
 };
-
-const calculateLastMessageSeenBy = (messages: FullMessageType[], users: User[]) => {
-  const lastMessageSeenBy: { [messageId: string]: User[] } = {};
-  let remainingUsers = [...users];
-
-  messages.forEach(message => {
-    if (remainingUsers.length === 0) {
-      return;
-    }
-
-    const intersection = remainingUsers.filter(user => message.seenIds.includes(user.id));
-    if (intersection.length > 0) {
-      lastMessageSeenBy[message.id] = intersection;
-
-      remainingUsers = remainingUsers.filter(userId => !intersection.includes(userId));
-    };
-  });
-
-  return lastMessageSeenBy;
-}
 
 export default Body;
