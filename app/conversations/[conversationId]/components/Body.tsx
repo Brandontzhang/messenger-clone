@@ -1,7 +1,7 @@
 import { FullMessageType } from "@/app/types";
 import { User } from "@prisma/client";
 
-import MessageList from "./MessageList";
+import MessageList from "./message/MessageList";
 import { useEffect, useRef, useState } from "react";
 import { pusherClient } from "@/app/libs/pusher";
 import useConversation from "@/app/hooks/useConversation";
