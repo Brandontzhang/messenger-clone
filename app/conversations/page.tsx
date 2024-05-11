@@ -1,6 +1,5 @@
 "use client"
 
-import { cn } from "@/util/common";
 import clsx, { ClassValue } from "clsx";
 
 import useConversation from "../hooks/useConversation";
