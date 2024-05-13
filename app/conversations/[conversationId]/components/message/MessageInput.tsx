@@ -1,8 +1,10 @@
 "use client";
 
+import clsx from "clsx";
 import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
 
 interface MessageInputProps {
+  className?: string,
   placeholder?: string,
   id: string,
   type?: string,
@@ -11,9 +13,9 @@ interface MessageInputProps {
   errors: FieldErrors
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ placeholder, id, type, required, register, errors }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ className, placeholder, id, type, required, register, errors }) => {
   return (
-    <div className="relative w-full">
+    <div className={clsx("relative w-full", className)}>
       <input
         id={id}
         type={type}

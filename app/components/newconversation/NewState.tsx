@@ -5,7 +5,9 @@ import NewGroupMemberSearchInput from "./NewGroupMemberSearchInput";
 
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
+
 import { User } from "@prisma/client";
+import Form from "@/app/conversations/[conversationId]/components/Form";
 
 const NewState = () => {
   // TODO: Add new conversation box (can also be deleted), go to next conversation? previously opened... how does it even track that?
@@ -53,23 +55,21 @@ const NewState = () => {
   }
 
   return (
-    <div className="w-full flex justify-center items-center">
-      <div className="bg-white w-full flex border-b-[1px] sm:px-4 py-3 px-4 lg:px-6 justify-between items-center shadow-sm">
-        <form className="w-full">
-          <NewGroupMemberSearchInput
-            register={register}
-            errors={errors}
-            onChange={onChange}
-            users={userDropdown}
-            addedUsers={addedUsers}
-            addUser={(user: User) => {
-              setAddedUsers(current => [...current, user])
-              setUserDropdown(current => current.filter(u => u.id !== user.id))
-            }}
-            removeUser={(user: User) => { setAddedUsers(current => current.filter(u => u.id !== user.id)) }}
-          />
-        </form>
+    <div className="w-full h-full flex flex-col justify-center items-center">
+      <div className="w-full flex border-b-[1px] sm:px-4 py-3 px-4 lg:px-6 justify-between items-center shadow-sm">
+        <NewGroupMemberSearchInput
+          onChange={onChange}
+          users={userDropdown}
+          addedUsers={addedUsers}
+          addUser={(user: User) => {
+            setAddedUsers(current => [...current, user])
+            setUserDropdown(current => current.filter(u => u.id !== user.id))
+          }}
+          removeUser={(user: User) => { setAddedUsers(current => current.filter(u => u.id !== user.id)) }}
+        />
       </div>
+      <div className="h-full" />
+      <Form />
     </div>
   )
 }

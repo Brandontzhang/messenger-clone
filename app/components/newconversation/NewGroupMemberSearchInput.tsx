@@ -7,11 +7,10 @@ import { useState } from "react";
 import { User } from "@prisma/client";
 import Avatar from "../Avatar";
 import { FaXmark } from "react-icons/fa6";
+import clsx from "clsx";
 
 interface NewGroupMemberSearchInputProps {
-  type?: string,
-  register: UseFormRegister<FieldValues>,
-  errors: FieldErrors,
+  className?: string,
   users: User[],
   addedUsers: User[],
   onChange: (event: any) => void,
@@ -19,12 +18,12 @@ interface NewGroupMemberSearchInputProps {
   removeUser: (user: User) => void,
 }
 
-const NewGroupMemberSearchInput: React.FC<NewGroupMemberSearchInputProps> = ({ type, register, errors, users, addedUsers, onChange, addUser, removeUser }) => {
+const NewGroupMemberSearchInput: React.FC<NewGroupMemberSearchInputProps> = ({ className, users, addedUsers, onChange, addUser, removeUser }) => {
   const [displayOptions, setDisplayOptions] = useState(false);
   const [query, setQuery] = useState("");
 
   return (
-    <div className="flex flex-row w-full items-center gap-2">
+    <div className={clsx("flex flex-row w-full items-center gap-2", className)}>
       <label className='block text-gray-900' htmlFor='id'>To:</label>
       <ul className="flex flex-row gap-2 max-w-[50%] flex-wrap">
         {addedUsers.map(user => (
