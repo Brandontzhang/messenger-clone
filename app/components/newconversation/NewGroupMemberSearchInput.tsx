@@ -1,7 +1,5 @@
 "use client";
 
-import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
-
 import { cn } from "@/util/common";
 import { useState } from "react";
 import { User } from "@prisma/client";
@@ -32,7 +30,12 @@ const NewGroupMemberSearchInput: React.FC<NewGroupMemberSearchInputProps> = ({ c
             className="flex flex-row items-center bg-gray-100 gap-1 p-1 rounded-md"
           >
             <span className="whitespace-nowrap">{user.name}</span>
-            <span className="hover:cursor-pointer" onClick={() => removeUser(user)}><FaXmark /></span>
+            <span
+              className="rounded-full p-1 hover:bg-gray-200 hover:cursor-pointer"
+              onClick={() => removeUser(user)}
+            >
+              <FaXmark />
+            </span>
           </li>
         ))}
       </ul>
