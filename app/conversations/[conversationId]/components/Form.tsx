@@ -6,7 +6,7 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { HiPhoto, HiPaperAirplane } from "react-icons/hi2";
 import { CldUploadButton } from "next-cloudinary";
 
-import MessageInput from "./MessageInput";
+import MessageInput from "./message/MessageInput";
 
 interface FormProps {
   messageLength: number

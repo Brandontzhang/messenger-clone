@@ -1,5 +1,5 @@
 ## Additional Features to Implement
-### Pagination for messages
+### Pagination for messages COMP
   - Offset Pagination:
     - two additional parameters are added to the database query
       - offset: how many records to skip before we reach the data we're looking for
@@ -22,7 +22,13 @@
         - Ok to update the message state
 
 ### Group messaging
+- Clicking on the top right button opens up a small menu that allows you to select people to add to a conversation... 
+- Open to a new conversation screen
+### Search bar
 ### Message editing
+  - Hover sections: more, reply, reaction
+    - Occurs when hovering over the entire row
+    - date only displays when hover over the text box
 ### User active status
 ### Conversation Settings
   - Pinned messages
@@ -42,3 +48,15 @@
     3. On logout, disconnect connections. If 2 is not possible, also need to disconnect when closed or restarted. It's supposed to be doing this automatically?
       - Maybe it's because I'm in dev
   - This looks like it might be an issue with hot reloading in development.
+### Pusher event handling
+  - Cannot bind multiple events using the pusherClient.bind() function
+  - Solution: use pusherClient.bind_global() and handle events individually within
+
+
+## Interesting Tips and Tricks (Lessons Learned)
+### CSS
+- Use absolute positioning within a relative div (with top, bottom, left, right) to positive relative to the relative parent div
+- Use transforms and translates to position relative to the div's own proportions 
+### Tailwind
+- Add custom classes (ex. radial gradients) through the tailwind.config.ts file
+

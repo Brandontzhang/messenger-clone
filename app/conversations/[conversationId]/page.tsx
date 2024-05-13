@@ -6,12 +6,24 @@ import Conversation from "./components/Conversation";
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import updateSeenByConversationId from "@/app/actions/updateSeenByConversationId";
 import getInitialMessages from "@/app/actions/getInitialMessages";
+import NewState from "@/app/components/newconversation/NewState";
 
 interface IParams {
   conversationId: string
 }
 
 const ConversationPage = async ({ params }: { params: IParams }) => {
+
+  if (params.conversationId === "new") {
+    return (
+      <div className="lg:pl-80 h-full">
+        <div className="h-full flex flex-col">
+          <NewState />
+        </div>
+      </div>
+    )
+  }
+
   const conversation = await getConversationById(params.conversationId);
   const messages = await getInitialMessages(params.conversationId);
   const currentUser = await getCurrentUser();
