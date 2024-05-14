@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
       where: {
         name: {
           startsWith: query ? query : "",
+          mode: "insensitive"
         },
       },
     });
