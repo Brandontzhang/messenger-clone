@@ -9,7 +9,7 @@ import { CldUploadButton } from "next-cloudinary";
 import MessageInput from "./message/MessageInput";
 
 interface FormProps {
-  addNewConversation: (values: FieldValues) => void,
+  addNewConversation?: (values: FieldValues) => void,
 }
 
 const Form: React.FC<FormProps> = ({ addNewConversation }) => {
@@ -29,7 +29,7 @@ const Form: React.FC<FormProps> = ({ addNewConversation }) => {
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setValue('message', '', { shouldValidate: true });
-    if (conversationId === "new") {
+    if (conversationId === "new" && addNewConversation) {
       addNewConversation(data);
     } else {
       axios.post("/api/messages", {

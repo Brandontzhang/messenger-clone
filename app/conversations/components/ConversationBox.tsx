@@ -11,6 +11,7 @@ import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
 import { User } from "@prisma/client";
 import { pusherClient } from "@/app/libs/pusher";
+import GroupUserIcon from "../[conversationId]/components/GroupUserIcon";
 
 interface ConversationBoxProps {
   data: FullConversationType,
@@ -95,7 +96,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
         selected ? 'bg-neutral-100' : 'bg-white',
       )}
     >
-      <Avatar user={otherUser} />
+      {data.users.length > 2 ? <GroupUserIcon users={data.users} size="sm" /> : <Avatar user={otherUser} />}
       <div className="min-w-0 flex-1">
         <div className="focus:outline-none">
           <div className="flex justify-between items-center mb-1">

@@ -13,9 +13,10 @@ interface HeaderProps {
     users: User[]
   },
   toggleSettings: () => void,
+  currentUser: User,
 }
 
-const Header: React.FC<HeaderProps> = ({ conversation, toggleSettings }) => {
+const Header: React.FC<HeaderProps> = ({ conversation, toggleSettings, currentUser }) => {
   const otherUser = useOtherUser(conversation);
   const statusText = useMemo(() => {
     if (conversation.isGroup) {
@@ -24,6 +25,14 @@ const Header: React.FC<HeaderProps> = ({ conversation, toggleSettings }) => {
 
     return 'Active';
   }, [conversation]);
+
+  const conversationName = useMemo(() => {
+    if (conversation.isGroup) {
+      return conversation.name ? conversation.name : conversation.users.filter(user => user.id !== currentUser.id).map(user => user.name).join(", ");
+    } else {
+      return otherUser.name
+    }
+  }, [conversation.id]);
 
   return (
     <div className="bg-white w-full flex border-b-[1px] sm:px-4 py-3 px-4 lg:px-6 justify-between items-center shadow-sm">
@@ -35,8 +44,8 @@ const Header: React.FC<HeaderProps> = ({ conversation, toggleSettings }) => {
         </Link>
         <Avatar user={otherUser} />
         <div className="flex flex-col">
-          <div>
-            {conversation.name || otherUser.name}
+          <div className="truncate">
+            {conversationName}
           </div>
           <div className="text-sm font-light text-neutral-500">
             {statusText}

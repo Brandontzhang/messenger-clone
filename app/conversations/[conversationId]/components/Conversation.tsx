@@ -28,6 +28,7 @@ const Conversation: React.FC<ConversationProps> = ({ conversation, messages, cur
         <Header
           conversation={conversation}
           toggleSettings={() => setOpenSettings((isOpen) => !isOpen)}
+          currentUser={currentUser!}
         />
         <Body
           initialMessages={messages}
