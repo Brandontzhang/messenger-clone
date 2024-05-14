@@ -3,32 +3,26 @@
 import axios from "axios";
 import NewGroupMemberSearchInput from "./NewGroupMemberSearchInput";
 
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { User } from "@prisma/client";
+import { Conversation, User } from "@prisma/client";
 import Form from "@/app/conversations/[conversationId]/components/Form";
+import { FieldValues } from "react-hook-form";
 
-const NewState = () => {
+interface NewStateProps {
+  currentUser: User,
+}
+
+const NewState: React.FC<NewStateProps> = ({ currentUser }) => {
   // TODO: Add new conversation box (can also be deleted), go to next conversation? previously opened... how does it even track that?
   const [query, setQuery] = useState("");
   const [addedUsers, setAddedUsers] = useState<User[]>([]);
   const [userDropdown, setUserDropdown] = useState<User[]>([]);
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: {
-      errors
-    }
-  } = useForm<FieldValues>({
-    defaultValues: {
-      message: ''
-    }
-  });
+
+  const router = useRouter();
 
   useEffect(() => {
-    // TODO: Query for users matching the search string
     if (query.length > 0) {
       axios.get(`/api/users`, {
         params: {
@@ -38,20 +32,27 @@ const NewState = () => {
         const { data: users } = data;
         setUserDropdown(() => {
           const selectedIds = addedUsers.map(u => u.id);
-          return users.filter((u: User) => !selectedIds.includes(u.id));
+          return users.filter((u: User) => !selectedIds.includes(u.id) && u.id !== currentUser.id);
         });
       })
     }
+    // TODO: On selecting a person, wipe out the drop down as well
   }, [query]);
-
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    setValue('message', '', { shouldValidate: true });
-
-    // TODO: Add user to the current list to be added to conversation
-  };
 
   const onChange = (event: any) => {
     setQuery(event.target.value);
+  }
+
+  // TODO: After creating the new conversation, also send the message
+  const addNewConversation = async (data: FieldValues) => {
+    const { data: conversation }: { data: Conversation } = await axios.post("/api/conversations", {
+      ...data,
+      userId: currentUser.id,
+      isGroup: addedUsers.length > 1,
+      members: [...addedUsers],
+    });
+
+    router.push(`/conversations/${conversation.id}`);
   }
 
   return (
@@ -69,7 +70,9 @@ const NewState = () => {
         />
       </div>
       <div className="h-full" />
-      <Form />
+      <Form
+        addNewConversation={addNewConversation}
+      />
     </div>
   )
 }

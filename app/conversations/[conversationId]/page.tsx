@@ -13,20 +13,21 @@ interface IParams {
 }
 
 const ConversationPage = async ({ params }: { params: IParams }) => {
+  const conversation = await getConversationById(params.conversationId);
+  const messages = await getInitialMessages(params.conversationId);
+  const currentUser = await getCurrentUser();
 
-  if (params.conversationId === "new") {
+  if (params.conversationId === "new" && currentUser) {
     return (
       <div className="lg:pl-80 h-full">
         <div className="h-full flex flex-col">
-          <NewState />
+          <NewState
+            currentUser={currentUser}
+          />
         </div>
       </div>
     )
   }
-
-  const conversation = await getConversationById(params.conversationId);
-  const messages = await getInitialMessages(params.conversationId);
-  const currentUser = await getCurrentUser();
 
   if (!conversation) {
     return (

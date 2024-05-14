@@ -1,10 +1,9 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
+import { User } from "@prisma/client";
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
     const body = await request.json();
@@ -19,7 +18,7 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    if (isGroup && (!members || members.length < 2 || !name)) {
+    if (isGroup && (!members || members.length < 2)) {
       return new NextResponse('Invalid data', { status: 400 });
     }
 
@@ -33,8 +32,8 @@ export async function POST(
           isGroup,
           users: {
             connect: [
-              ...members.map((member: { value: string }) => ({
-                id: member.value
+              ...members.map((member: User) => ({
+                id: member.id
               })),
               {
                 id: currentUser.id
