@@ -7,7 +7,6 @@ interface GroupUserIconProps {
   size?: "sm" | "md" | "lg",
 }
 
-// TODO: Add size changes
 const GroupUserIcon: React.FC<GroupUserIconProps> = ({ users, size }) => {
   if (users.length < 2) {
     return (
