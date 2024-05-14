@@ -70,7 +70,11 @@ const MessageOptions: React.FC<MessageOptionsProps> = ({ className, messageId })
           "flex flex-col shadow-lg rounded-lg text-black"
         )}>
           {ellipsesOptions.map(option => (
-            <div className="p-2 pr-16 m-1 rounded-lg hover:bg-gray-100 hover:cursor-pointer" onClick={option.onClick}>
+            <div
+              key={option.text}
+              className="p-2 pr-16 m-1 rounded-lg hover:bg-gray-100 hover:cursor-pointer"
+              onClick={option.onClick}
+            >
               {option.text}
             </div>
           ))}
@@ -92,6 +96,7 @@ const MessageOptions: React.FC<MessageOptionsProps> = ({ className, messageId })
         )}>
           {emojis.map(emoji => (
             <span
+              key={emoji.reaction}
               className="hover:cursor-pointer"
               onClick={() => addReaction(messageId, emoji.reaction)}
             >
