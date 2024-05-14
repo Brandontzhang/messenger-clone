@@ -43,9 +43,9 @@ const NewState: React.FC<NewStateProps> = ({ currentUser }) => {
     setQuery(event.target.value);
   }
 
-  // TODO: After creating the new conversation, also send the message
   const addNewConversation = async (data: FieldValues) => {
     const { data: conversation }: { data: Conversation } = await axios.post("/api/conversations", {
+      ...data,
       userId: currentUser.id,
       isGroup: addedUsers.length > 1,
       members: [...addedUsers],

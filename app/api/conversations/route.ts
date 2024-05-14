@@ -2,6 +2,7 @@ import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
 import { User } from "@prisma/client";
+import { pusherServer } from "@/app/libs/pusher";
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +12,8 @@ export async function POST(request: Request) {
       userId,
       isGroup,
       members,
-      name
+      name,
+      message
     } = body;
 
     if (!currentUser?.id || !currentUser?.email) {
@@ -42,7 +44,8 @@ export async function POST(request: Request) {
           }
         },
         include: {
-          users: true
+          users: true,
+          messages: true,
         }
       });
 
@@ -93,6 +96,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newConversation);
   } catch (error: any) {
+    console.log(error);
     return new NextResponse('Internal Errror', { status: 500 })
   }
 }

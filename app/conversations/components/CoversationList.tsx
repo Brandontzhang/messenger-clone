@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 
-import { FullConversationType } from "@/app/types";
+import { FullConversationType, FullMessageType } from "@/app/types";
 import useConversation from "@/app/hooks/useConversation";
 import ConversationBox from "./ConversationBox";
 import { User } from "@prisma/client";
 import { FaEdit } from "react-icons/fa";
+import { pusherClient } from "@/app/libs/pusher";
 
 interface ConversationListProps {
   initialItems: FullConversationType[],
@@ -16,9 +17,38 @@ interface ConversationListProps {
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({ initialItems, currentUser }) => {
-  const [items, setItems] = useState(initialItems);
+  const [conversations, setConversations] = useState(initialItems);
   const router = useRouter();
   const { conversationId, isOpen } = useConversation();
+
+  useEffect(() => {
+    pusherClient.subscribe(currentUser.id);
+    pusherClient.bind_global((event: string, data: { conversation: FullConversationType, message: FullMessageType }) => {
+      const { conversation } = data;
+      switch (event) {
+        case "conversation:update":
+          newConversationUpdateHandler(conversation);
+          break;
+        default:
+          return
+      }
+    });
+
+    return () => {
+      pusherClient.unbind_global();
+      pusherClient.unsubscribe(currentUser.id);
+    }
+  }, []);
+
+  const newConversationUpdateHandler = (conversation: FullConversationType) => {
+    const existingConversastion = conversations.find(conv => conv.id === conversation.id);
+
+    if (existingConversastion) {
+      return;
+    }
+
+    setConversations((current) => [conversation, ...current]);
+  };
 
   return (
     <aside className={clsx(
@@ -37,11 +67,11 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, curre
             <FaEdit size={20} />
           </div>
         </div>
-        {items.map((item) => (
+        {conversations.map((conversation) => (
           <ConversationBox
-            key={item.id}
-            data={item}
-            selected={conversationId === item.id}
+            key={conversation.id}
+            data={conversation}
+            selected={conversationId === conversation.id}
             currentUser={currentUser}
           />
         ))}

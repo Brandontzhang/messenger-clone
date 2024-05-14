@@ -69,14 +69,31 @@ export async function POST(request: Request) {
       });
 
     const lastMessage = updatedConversation.messages[updatedConversation.messages.length - 1];
+
     // WARN: removing due to pusher size limit
     lastMessage.sender.seenMessageIds = [];
+    lastMessage.sender.conversationIds = [];
+    lastMessage.seen = lastMessage.seen.map(user => {
+      return {
+        ...user,
+        seenMessageIds: [],
+        conversationIds: [],
+      }
+    });
+    updatedConversation.users = updatedConversation.users.map(user => {
+      return {
+        ...user,
+        seenMessageIds: [],
+        conversationIds: [],
+      }
+    });
+
     updatedConversation.users.map(user => {
       const data = {
-        id: conversationId,
-        messages: [lastMessage],
+        conversation: updatedConversation,
+        message: [lastMessage],
       };
-      pusherServer.trigger(user.email!, 'conversation:update', data).
+      pusherServer.trigger(user.id!, 'conversation:update', data).
         catch((e: any) => {
           console.log(`Conversation Update Error: ${e}`);
           console.log(data);
