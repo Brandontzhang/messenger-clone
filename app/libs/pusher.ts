@@ -1,5 +1,7 @@
 import PusherServer from 'pusher';
 import PusherClient from 'pusher-js';
+import { FullConversationType, FullMessageType } from '../types';
+import { User } from '@prisma/client';
 
 export const pusherServer = new PusherServer({
   appId: process.env.PUSHER_APP_ID!,
@@ -15,6 +17,30 @@ export const pusherClient = new PusherClient(
     cluster: 'us2',
   }
 );
+
+// WARN: Functions below are used to reduce the payload before sending on pusher
+export const cleanConversation = (conversation: FullConversationType) => {
+  conversation.users = conversation.users.map(user => cleanUser(user));
+  conversation.messageIds = [];
+  conversation.messages = conversation.messages.
+    slice(-5).
+    map(message => cleanMessage(message));
+
+  return conversation;
+};
+
+export const cleanMessage = (message: FullMessageType) => {
+  message.sender = cleanUser(message.sender);
+  message.seen = message.seen.map(user => cleanUser(user));
+
+  return message;
+};
+
+export const cleanUser = (user: User) => {
+  user.conversationIds = [];
+  user.seenMessageIds = [];
+  return user;
+};
 
 
 // TODO: Whenever the server needs to push a change to the client, use pusherServer.trigger

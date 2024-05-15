@@ -5,7 +5,7 @@ import MessageList from "./message/MessageList";
 import { useEffect, useRef, useState } from "react";
 import { pusherClient } from "@/app/libs/pusher";
 import useConversation from "@/app/hooks/useConversation";
-import { find } from "lodash";
+import { find, update } from "lodash";
 import axios from "axios";
 
 
@@ -21,15 +21,18 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
   const { conversationId } = useConversation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const calculateLastMessageSeenBy = (messages: FullMessageType[], users: User[]) => {
+  const calculateLastMessageSeenBy = (allMessages: FullMessageType[], users: User[]) => {
     const lastMessageSeenBy: { [messageId: string]: User[] } = {};
     let remainingUsers = users.filter(user => user.id !== currentUser!.id);
 
-    messages.forEach(message => {
+    allMessages.forEach(message => {
       if (remainingUsers.length === 0) {
         return;
       }
 
+      console.log(message.body);
+      console.log(message.seenIds)
+      // BUG: the seen ids are not populated fully on the return message 
       const intersection = remainingUsers.filter(user => message.seenIds.includes(user.id));
       if (intersection.length > 0) {
         lastMessageSeenBy[message.id] = intersection;
@@ -38,6 +41,7 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
       };
     });
 
+    console.log(lastMessageSeenBy);
     return lastMessageSeenBy;
   }
   const [lastMessageSeenBy, setLastMessageSeenBy] = useState(calculateLastMessageSeenBy(messages, users));
@@ -54,6 +58,16 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
     };
 
     const seenUpdateHandler = (updatedMessage: FullMessageType) => {
+      setMessages((current) => {
+        current.forEach(message => {
+          if (message.id === updatedMessage.id) {
+            message.seenIds = updatedMessage.seenIds;
+          }
+        });
+
+        return current;
+      });
+
       setLastMessageSeenBy(current => {
         let updatedSeen: { [messageId: string]: User[] } = {};
         Object.entries(current).forEach(seenData => {
@@ -80,7 +94,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
 
         // TODO: There's a bug affecting the seen when a new message is sent, must be an error here
         setLastMessageSeenBy(calculateLastMessageSeenBy(newMessages, users));
-
         return newMessages;
       });
     };

@@ -25,6 +25,8 @@
 - Clicking on the top right button opens up a small menu that allows you to select people to add to a conversation... 
 - Open to a new conversation screen
 ### Search bar
+- Search for conversations
+- Search for users
 ### Message editing
   - Hover sections: more, reply, reaction
     - Occurs when hovering over the entire row

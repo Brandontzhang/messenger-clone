@@ -75,19 +75,25 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected, curre
     }
 
     if (userEmail) {
-      pusherClient.subscribe(userEmail!);
-
-      pusherClient.bind("conversation:update", conversationUpdateHandler);
-      // TODO: Why is this seen event being triggered when it's subscribed to the wrong channel? And the one that is at the correct one isn'?
-      // Fix with bind global
-      pusherClient.bind("seen:update", seenUpdateHandler);
+      pusherClient.subscribeAll();
+      pusherClient.bind_global((event: string, data: any) => {
+        switch (event) {
+          case "conversation:update":
+            const { conversation, messages } = data as { conversation: FullConversationType, messages: FullMessageType[] };
+            conversationUpdateHandler({
+              id: conversation.id,
+              messages: messages
+            });
+            break;
+          case "seen:update":
+            const message = data as FullMessageType;
+            seenUpdateHandler(message);
+            break;
+        }
+      });
     }
     return () => {
-      pusherClient.unbind("conversation:update");
-      pusherClient.unbind("seen:update");
-
       pusherClient.unbind_global();
-      pusherClient.unsubscribe(userEmail!);
     };
   }, [userEmail]);
 

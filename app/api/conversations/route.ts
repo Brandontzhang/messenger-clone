@@ -2,7 +2,7 @@ import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
 import { User } from "@prisma/client";
-import { pusherServer } from "@/app/libs/pusher";
+import { cleanConversation, pusherServer } from "@/app/libs/pusher";
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       // TODO: Pull existing group conversation
       // When creating a new conversation, the user creating the conversation should be added as well
       // The included parameter makes it so that the newConversation object includes the user fields as well (sort of like a join instead of just getting foreign key)
-      const newConversation = await prisma.conversation.create({
+      let newConversation = await prisma.conversation.create({
         data: {
           name,
           isGroup,
@@ -45,10 +45,24 @@ export async function POST(request: Request) {
         },
         include: {
           users: true,
-          messages: true,
+          messages: {
+            include: {
+              seen: true,
+              sender: true,
+            }
+          }
         }
       });
 
+
+      // Cleaning data to reduce payload for pusher 
+      newConversation.messages = [message];
+      newConversation = cleanConversation(newConversation);
+
+      await pusherServer.trigger(userId, 'conversation:new', {
+        conversation: newConversation,
+        message: message
+      });
       return NextResponse.json(newConversation);
     }
 

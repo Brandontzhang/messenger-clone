@@ -1,7 +1,7 @@
 import prisma from "@/app/libs/prismadb";
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/app/actions/getCurrentUser";
-import { pusherServer } from "@/app/libs/pusher";
+import { cleanMessage, pusherServer } from "@/app/libs/pusher";
 
 interface IParams {
   conversationId?: string
@@ -43,7 +43,7 @@ export async function POST(
       return NextResponse.json(conversation);
     }
 
-    const updatedMessage = await prisma.message.update({
+    let updatedMessage = await prisma.message.update({
       where: {
         id: lastMessage.id
       },
@@ -60,10 +60,9 @@ export async function POST(
       }
     });
 
-    // WARN: Wiping out so pusher can send, but on receiving the push even cannot expect the seen message ids. This is going against the types...
-    // Not good design. 
-    updatedMessage.sender.seenMessageIds = [];
-    updatedMessage.seen.forEach(user => user.seenMessageIds = []);
+    // Cleaning message to reduce payload before sending through pusher
+    updatedMessage = cleanMessage(updatedMessage);
+    console.log(updatedMessage.seenIds);
 
     await pusherServer.trigger(conversation.id, 'seen:update', updatedMessage).
       catch((e: any) => {

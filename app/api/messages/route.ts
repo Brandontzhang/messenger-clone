@@ -1,7 +1,7 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
-import { pusherServer } from "@/app/libs/pusher";
+import { cleanConversation, cleanMessage, pusherServer } from "@/app/libs/pusher";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const newMessage = await prisma.message.create({
+    let newMessage = await prisma.message.create({
       data: {
         body: message,
         image: image,
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       }
     });
 
-    const updatedConversation = await prisma.conversation.update({
+    let updatedConversation = await prisma.conversation.update({
       where: {
         id: conversationId
       },
@@ -62,36 +62,20 @@ export async function POST(request: Request) {
       }
     });
 
-    newMessage.sender.seenMessageIds = [];
+    // Cleaning data before sending through pusher to prevent 413 error
+    newMessage = cleanMessage(newMessage);
+    updatedConversation = cleanConversation(updatedConversation);
+    const lastMessage = updatedConversation.messages[updatedConversation.messages.length - 1];
+
     await pusherServer.trigger(conversationId, 'messages:new', newMessage).
       catch(e => {
         console.log(`New Message Error: ${e}`);
       });
 
-    const lastMessage = updatedConversation.messages[updatedConversation.messages.length - 1];
-
-    // WARN: removing due to pusher size limit
-    lastMessage.sender.seenMessageIds = [];
-    lastMessage.sender.conversationIds = [];
-    lastMessage.seen = lastMessage.seen.map(user => {
-      return {
-        ...user,
-        seenMessageIds: [],
-        conversationIds: [],
-      }
-    });
-    updatedConversation.users = updatedConversation.users.map(user => {
-      return {
-        ...user,
-        seenMessageIds: [],
-        conversationIds: [],
-      }
-    });
-
     updatedConversation.users.map(user => {
       const data = {
         conversation: updatedConversation,
-        message: [lastMessage],
+        messages: [lastMessage],
       };
       pusherServer.trigger(user.id!, 'conversation:update', data).
         catch((e: any) => {
