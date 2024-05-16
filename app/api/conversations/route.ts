@@ -1,5 +1,5 @@
 import getCurrentUser from "@/app/actions/getCurrentUser";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
 import { User } from "@prisma/client";
 import { cleanConversation, pusherServer } from "@/app/libs/pusher";
@@ -77,6 +77,57 @@ export async function POST(request: Request) {
   }
 };
 
+export async function GET(request: NextRequest) {
+  try {
+    const currentUser = await getCurrentUser();
+    const searchParams = request.nextUrl.searchParams;
+    const query = searchParams.get("query");
+
+    // TODO: test these queries... especially the user one
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              startsWith: query ? query : "",
+              mode: "insensitive",
+            },
+          },
+          {
+            users: {
+              some: {
+                name: {
+                  startsWith: query ? query : "",
+                  mode: "insensitive",
+                }
+              }
+            }
+          }
+        ],
+        users: {
+          some: {
+            id: currentUser!.id
+          }
+        }
+      },
+      include: {
+        users: true,
+        messages: {
+          include: {
+            seen: true,
+            sender: true,
+          }
+        }
+      },
+    });
+
+    return NextResponse.json(conversations.map(conversation => cleanConversation(conversation)));
+  } catch (error: any) {
+    console.log(error, 'ERROR_MESSAGES');
+    return new NextResponse('Internal Error', { status: 500 });
+  }
+}
+
 const createGroupConversation = async (body: any, currentUser: User) => {
   const {
     userId,
@@ -137,5 +188,4 @@ const createGroupConversation = async (body: any, currentUser: User) => {
     message: message
   });
   return NextResponse.json(newConversation);
-
 }

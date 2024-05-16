@@ -20,6 +20,4 @@ export async function GET(request: NextRequest) {
     console.log(error, 'ERROR_MESSAGES');
     return new NextResponse('Internal Error', { status: 500 });
   }
-
 }
-
