@@ -1,4 +1,3 @@
-"use client";
 import { cn } from "@/util/common";
 
 import getConversationById from "@/app/actions/getConversationById";
