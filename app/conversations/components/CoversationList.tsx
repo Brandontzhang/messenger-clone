@@ -22,8 +22,9 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, curre
   const { conversationId, isOpen } = useConversation();
 
   useEffect(() => {
-    pusherClient.subscribe(currentUser.id);
+    pusherClient.subscribeAll();
     pusherClient.bind_global((event: string, data: { conversation: FullConversationType, message: FullMessageType }) => {
+      console.log(event);
       const { conversation } = data;
       switch (event) {
         case "conversation:update":
@@ -36,9 +37,8 @@ const ConversationList: React.FC<ConversationListProps> = ({ initialItems, curre
 
     return () => {
       pusherClient.unbind_global();
-      pusherClient.unsubscribe(currentUser.id);
     }
-  }, []);
+  }, [conversations]);
 
   const newConversationUpdateHandler = (conversation: FullConversationType) => {
     const existingConversastion = conversations.find(conv => conv.id === conversation.id);

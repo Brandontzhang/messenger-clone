@@ -30,9 +30,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
         return;
       }
 
-      console.log(message.body);
-      console.log(message.seenIds)
-      // BUG: the seen ids are not populated fully on the return message 
       const intersection = remainingUsers.filter(user => message.seenIds.includes(user.id));
       if (intersection.length > 0) {
         lastMessageSeenBy[message.id] = intersection;
@@ -41,7 +38,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
       };
     });
 
-    console.log(lastMessageSeenBy);
     return lastMessageSeenBy;
   }
   const [lastMessageSeenBy, setLastMessageSeenBy] = useState(calculateLastMessageSeenBy(messages, users));
@@ -117,7 +113,6 @@ const Body: React.FC<BodyProps> = ({ initialMessages, currentUser, users }) => {
 
     return () => {
       pusherClient.unbind_global();
-      pusherClient.unsubscribe(conversationId);
     }
   }, [conversationId]);
 

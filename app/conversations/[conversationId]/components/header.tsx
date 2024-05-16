@@ -7,6 +7,7 @@ import Link from "next/link";
 import { HiChevronLeft } from "react-icons/hi";
 import { HiEllipsisHorizontal } from "react-icons/hi2";
 import Avatar from "@/app/components/Avatar";
+import GroupUserIcon from "./GroupUserIcon";
 
 interface HeaderProps {
   conversation: Conversation & {
@@ -42,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ conversation, toggleSettings, currentUs
           href="/conversations">
           <HiChevronLeft size={32} />
         </Link>
-        <Avatar user={otherUser} />
+        {conversation.users.length > 0 ? <GroupUserIcon users={conversation.users} size="sm" /> : <Avatar user={otherUser} />}
         <div className="flex flex-col">
           <div className="truncate">
             {conversationName}
