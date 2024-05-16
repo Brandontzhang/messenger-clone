@@ -12,9 +12,9 @@ export async function POST(request: Request) {
       userId,
       isGroup,
       members,
-      name,
-      message
     } = body;
+
+
 
     if (!currentUser?.id || !currentUser?.email) {
       return new NextResponse('Unauthorized', { status: 401 });
@@ -25,45 +25,7 @@ export async function POST(request: Request) {
     }
 
     if (isGroup) {
-      // TODO: Pull existing group conversation
-      // When creating a new conversation, the user creating the conversation should be added as well
-      // The included parameter makes it so that the newConversation object includes the user fields as well (sort of like a join instead of just getting foreign key)
-      let newConversation = await prisma.conversation.create({
-        data: {
-          name,
-          isGroup,
-          users: {
-            connect: [
-              ...members.map((member: User) => ({
-                id: member.id
-              })),
-              {
-                id: currentUser.id
-              }
-            ]
-          }
-        },
-        include: {
-          users: true,
-          messages: {
-            include: {
-              seen: true,
-              sender: true,
-            }
-          }
-        }
-      });
-
-
-      // Cleaning data to reduce payload for pusher 
-      newConversation.messages = [message];
-      newConversation = cleanConversation(newConversation);
-
-      await pusherServer.trigger(userId, 'conversation:new', {
-        conversation: newConversation,
-        message: message
-      });
-      return NextResponse.json(newConversation);
+      return createGroupConversation(body, currentUser);
     }
 
     // TODO: He adds the two to prevent a bug, not sure why this is happening, but perhaps something to look into
@@ -113,4 +75,67 @@ export async function POST(request: Request) {
     console.log(error);
     return new NextResponse('Internal Errror', { status: 500 })
   }
+};
+
+const createGroupConversation = async (body: any, currentUser: User) => {
+  const {
+    userId,
+    isGroup,
+    members,
+    name,
+    message
+  } = body;
+
+  const groupMembers = [...members, currentUser];
+  // Handle existing conversations
+  let existingConversation = await prisma.conversation.findFirst({
+    where: {
+      userIds: {
+        hasEvery: groupMembers.map((member: User) => member.id),
+      }
+    }
+  });
+
+  if (existingConversation) {
+    return NextResponse.json(existingConversation);
+  }
+
+  // The included parameter makes it so that the newConversation object includes the user fields as well
+  // (sort of like a join instead of just getting foreign key)
+  let newConversation = await prisma.conversation.create({
+    data: {
+      name,
+      isGroup,
+      users: {
+        connect: [
+          ...groupMembers.map((member: User) => ({
+            id: member.id
+          })),
+          {
+            id: currentUser.id
+          }
+        ]
+      }
+    },
+    include: {
+      users: true,
+      messages: {
+        include: {
+          seen: true,
+          sender: true,
+        }
+      }
+    },
+  });
+
+  // Cleaning data to reduce payload for pusher 
+  newConversation = cleanConversation(newConversation);
+  newConversation.messages = [message];
+
+  await pusherServer.trigger(userId, 'conversation:new', {
+    conversation: newConversation,
+    message: message
+  });
+  return NextResponse.json(newConversation);
+
 }
