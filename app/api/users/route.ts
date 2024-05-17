@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
 
 export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get("query");
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const query = searchParams.get("query");
 
     const users = await prisma.user.findMany({
       where: {

@@ -78,11 +78,10 @@ export async function POST(request: Request) {
 };
 
 export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get("query");
   try {
     const currentUser = await getCurrentUser();
-    const searchParams = request.nextUrl.searchParams;
-    const query = searchParams.get("query");
-
     // TODO: test these queries... especially the user one
     const conversations = await prisma.conversation.findMany({
       where: {

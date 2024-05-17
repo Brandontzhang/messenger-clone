@@ -24,7 +24,7 @@ const AuthForm = () => {
     if (session?.status === 'authenticated') {
       router.push("/users");
     }
-  }, [session?.status]);
+  }, [router, session?.status]);
 
   // The function is memoized, and only rerendered when the variant variable changes
   const toggleVariant = useCallback(() => {

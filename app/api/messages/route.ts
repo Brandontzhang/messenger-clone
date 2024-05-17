@@ -92,11 +92,11 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const messageId = searchParams.get("messageId");
-    const conversationId = searchParams.get("conversationId");
+  const searchParams = request.nextUrl.searchParams;
+  const messageId = searchParams.get("messageId");
+  const conversationId = searchParams.get("conversationId");
 
+  try {
     const messages = await prisma.message.findMany({
       where: {
         conversationId: conversationId!

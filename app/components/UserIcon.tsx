@@ -17,7 +17,7 @@ const UserIcon: React.FC<UserIconProps> = ({ user, className, size }) => {
       sizeStr,
       className,
     )}>
-      <Image alt="Avatar" src={user.image || '/images/placeholder.jpg'} fill />
+      {user?.image ? <Image alt="Avatar" src={user.image || '/images/placeholder.jpg'} fill /> : null}
     </div >
   )
 };
