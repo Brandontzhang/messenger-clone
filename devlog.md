@@ -62,3 +62,6 @@
 ### Tailwind
 - Add custom classes (ex. radial gradients) through the tailwind.config.ts file
 
+## Bugs fixed
+- Bug: On prod deploy, running into error rendering static pages because of next.searchParams.
+- Solution: move the searchParam code, used in the GET routes (ex. /api/users and /api/messages), out of the try catch blocks since NextJS will catch them separately.
